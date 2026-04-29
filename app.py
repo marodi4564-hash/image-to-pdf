@@ -1,17 +1,21 @@
 import streamlit as st
 from PIL import Image
 import io
+import os
 
-st.title("Image to PDF Converter (400-500KB)")
+st.set_page_config(page_title="PDF Converter", page_icon="📄")
 
-uploaded_file = st.file_uploader("Apni Photo Upload Karein", type=["jpg", "jpeg", "png"])
+st.title("Image to PDF Converter (400KB-500KB)")
+st.write("Apni photo upload karein, yeh automatic 400KB-500KB ke beech PDF bana dega.")
+
+uploaded_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file)
     if img.mode == 'RGBA':
         img = img.convert('RGB')
     
-    # Binary search for quality
+    # Binary search for quality to hit target size (400KB - 500KB)
     low = 1
     high = 100
     best_pdf = None
@@ -34,6 +38,17 @@ if uploaded_file is not None:
         
     if best_pdf:
         st.success(f"PDF tayyar hai!")
-        st.download_button("Download PDF", best_pdf, "document.pdf", "application/pdf")
+        
+        # Dynamic Filename Logic
+        original_name = uploaded_file.name
+        output_filename = os.path.splitext(original_name)[0] + ".pdf"
+        
+        st.download_button(
+            label="Download PDF",
+            data=best_pdf,
+            file_name=output_filename,
+            mime="application/pdf"
+        )
     else:
         st.error("Photo ka size adjust nahi ho pa raha. Dusri photo try karein.")
+
